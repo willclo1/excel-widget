@@ -1,4 +1,6 @@
-![Excel Tool Logo](logo.png)
+<p align="center">
+  <img src="logo.png" alt="Excel Tool Logo" width="200"/>
+</p>
 
 # Excel Tool
 
