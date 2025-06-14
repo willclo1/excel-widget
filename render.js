@@ -4,5 +4,6 @@ document.getElementById('openBtn').addEventListener('click', async () => {
   if (!result.canceled) {
     document.getElementById('fileContent').innerText = result.content;
     console.log('File Content:', result.content);
+
   }
 });

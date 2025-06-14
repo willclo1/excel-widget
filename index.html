@@ -2,19 +2,20 @@
 <html>
 
 <head>
-    <title>Excel Display</title>
+    <title>Excel Display with Templates</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
         body {
             font-family: 'Inter', system-ui, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
+            padding: 20px;
         }
 
         .container {
@@ -24,9 +25,67 @@
             padding: 40px;
             border-radius: 20px;
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            max-width: 600px;
+            width: 100%;
         }
 
-        .upload-btn {
+        .step {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .step h3 {
+            margin-bottom: 15px;
+            color: #e0e7ff;
+            font-size: 18px;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .template-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .template-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .template-card.selected {
+            border-color: #4f46e5;
+            background: rgba(79, 70, 229, 0.2);
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
+        }
+
+        .template-card h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .template-card p {
+            margin: 0;
+            font-size: 12px;
+            opacity: 0.8;
+            line-height: 1.3;
+        }
+
+        .upload-btn,
+        .process-btn {
             background: linear-gradient(135deg, #4f46e5, #7c3aed);
             border: none;
             padding: 15px 30px;
@@ -35,17 +94,49 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 20px;
+            margin: 10px;
             transition: all 0.3s ease;
+            min-width: 150px;
         }
 
-        .upload-btn:hover {
+        .upload-btn:hover,
+        .process-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
         }
 
+        .process-btn:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         #status {
             margin-top: 20px;
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .file-info {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border-radius: 50%;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
             font-size: 14px;
         }
     </style>
@@ -54,15 +145,71 @@
 <body>
     <div class="container">
         <h1>Schedule Widget</h1>
-        <p>Upload an excel file to maintain an open schedule always visible on your desktop!</p>
-        <button class="upload-btn" id="uploadBtn">Choose Excel File</button>
+        <p>Upload an Excel file and choose a template to create a beautiful schedule display!</p>
+
+        <div class="step">
+            <h3><span class="step-number">1</span>Select Template</h3>
+            <div class="template-grid" id="templateGrid">
+                <div class="template-card" data-template="modern">
+                    <h4>Modern</h4>
+                    <p>Clean gradients with hover effects and smooth animations</p>
+                </div>
+                <div class="template-card" data-template="minimal">
+                    <h4>Minimal</h4>
+                    <p>Simple, clean design with subtle borders</p>
+                </div>
+                <div class="template-card" data-template="colorful">
+                    <h4>Colorful</h4>
+                    <p>Activity-based color coding with vibrant themes</p>
+                </div>
+                <div class="template-card" data-template="dark">
+                    <h4>Dark Mode</h4>
+                    <p>Dark theme with neon accents</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">2</span>Upload Excel File</h3>
+            <button class="upload-btn" id="uploadBtn">Choose Excel File</button>
+            <div id="fileInfo"></div>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">3</span>Generate Schedule</h3>
+            <button class="process-btn" id="processBtn" disabled>Generate with Selected Template</button>
+        </div>
+
         <div id="status"></div>
     </div>
 
     <script>
-        const uploadBtn = document.getElementById('uploadBtn');
-        const status = document.getElementById('status');
+        let selectedTemplate = 'modern'; // Default template
+        let selectedFile = null;
 
+        const templateGrid = document.getElementById('templateGrid');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const processBtn = document.getElementById('processBtn');
+        const status = document.getElementById('status');
+        const fileInfo = document.getElementById('fileInfo');
+
+        // Template selection
+        templateGrid.addEventListener('click', (e) => {
+            const card = e.target.closest('.template-card');
+            if (card) {
+                // Remove previous selection
+                document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+                // Add selection to clicked card
+                card.classList.add('selected');
+                selectedTemplate = card.dataset.template;
+                updateProcessButton();
+            }
+        });
+
+        // Set default template as selected
+        document.querySelector('[data-template="modern"]').classList.add('selected');
+
+        // File upload
         uploadBtn.addEventListener('click', async () => {
             status.textContent = 'Opening file dialog...';
 
@@ -75,16 +222,59 @@
                 }
 
                 if (result.success) {
-                    status.textContent = 'File converted successfully! Loading...';
+                    selectedFile = result.filePath;
+                    fileInfo.innerHTML = `
+                        <div class="file-info">
+                            <strong>✓ File Selected:</strong><br>
+                            ${result.filePath.split(/[\\/]/).pop()}
+                        </div>
+                    `;
+                    status.textContent = 'File uploaded successfully! Select a template and click Generate.';
+                    updateProcessButton();
+                } else {
+                    status.textContent = `Error: ${result.error}`;
+                    fileInfo.innerHTML = '';
+                    selectedFile = null;
+                    updateProcessButton();
+                }
+            } catch (error) {
+                status.textContent = `Error: ${error.message}`;
+                fileInfo.innerHTML = '';
+                selectedFile = null;
+                updateProcessButton();
+            }
+        });
+
+        // Process with template
+        processBtn.addEventListener('click', async () => {
+            if (!selectedFile || !selectedTemplate) return;
+
+            status.textContent = 'Generating schedule with selected template...';
+            processBtn.disabled = true;
+
+            try {
+                const result = await window.electronAPI.processWithTemplate({
+                    filePath: selectedFile,
+                    template: selectedTemplate
+                });
+
+                if (result.success) {
+                    status.textContent = 'Schedule generated successfully! Loading...';
                     // Reload the window with the new content
                     await window.electronAPI.reloadContent(result.outputPath);
                 } else {
                     status.textContent = `Error: ${result.error}`;
+                    processBtn.disabled = false;
                 }
             } catch (error) {
                 status.textContent = `Error: ${error.message}`;
+                processBtn.disabled = false;
             }
         });
+
+        function updateProcessButton() {
+            processBtn.disabled = !selectedFile || !selectedTemplate;
+        }
     </script>
 </body>
 
