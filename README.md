@@ -44,19 +44,21 @@ If a user needs to display a schedule on their desktop constantly as a widget th
    ```
 
 4. To build the app:
-  a. For mac
-   ```bash
-   npm run dist:mac
-   ```
-  b. For windows
-  ```bash
-   npm run dist:win
-   ```
-  c. For all
-   ```bash
-   npm run dist:all
-   ```
 
+   - **For macOS**  
+     ```bash
+     npm run dist:mac
+     ```
+
+   - **For Windows**  
+     ```bash
+     npm run dist:win
+     ```
+
+   - **For all platforms**  
+     ```bash
+     npm run dist:all
+     ```
 ## Notes
 
 - The HTML is generated from JS and then loaded into the app window.
