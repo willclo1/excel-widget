@@ -3,7 +3,7 @@ const path = require('path')
 const fs = require('fs')
 const AsposeCells = require("aspose.cells.node")
 
-// Template definitions
+// Template definitions optimized for 500x500
 const templates = {
   modern: {
     name: 'Modern',
@@ -26,12 +26,9 @@ const templates = {
 async function generateHtml(inputFilePath = null, templateName = 'modern') {
   try {
     let inputPath;
-    
     if (inputFilePath) {
-      // Use the user-selected file
       inputPath = inputFilePath;
     } else {
-      // Fall back to default template (existing logic)
       const isPackaged = app.isPackaged;
       if (isPackaged) {
         inputPath = path.join(process.resourcesPath, "weekly_schedule_12hr_template.xlsx");
@@ -39,12 +36,11 @@ async function generateHtml(inputFilePath = null, templateName = 'modern') {
         inputPath = path.join(__dirname, "weekly_schedule_12hr_template.xlsx");
       }
     }
-    
+
     const outputPath = path.join(__dirname, "output.html");
-    
     console.log("Processing Excel file at:", inputPath);
     console.log("Using template:", templateName);
-    
+
     if (!fs.existsSync(inputPath)) {
       throw new Error(`Excel file not found at: ${inputPath}`);
     }
@@ -52,12 +48,9 @@ async function generateHtml(inputFilePath = null, templateName = 'modern') {
     const workbook = new AsposeCells.Workbook(inputPath);
     const options = new AsposeCells.HtmlSaveOptions();
     options.saveAsSingleFile = true;
-
     workbook.save(outputPath, options);
-    
-    // Add template-specific CSS to the generated HTML
+
     await addTemplateCSS(outputPath, templateName);
-    
     console.log(`✅ output.html generated from: ${inputPath} with ${templateName} template`);
     return outputPath;
   } catch (err) {
@@ -69,54 +62,60 @@ async function generateHtml(inputFilePath = null, templateName = 'modern') {
 async function addTemplateCSS(htmlPath, templateName) {
   try {
     let html = fs.readFileSync(htmlPath, 'utf8');
-    
     const template = templates[templateName] || templates.modern;
     const templateCSS = template.css;
-    
-    // Insert the CSS before the closing </head> tag or before </body> if no head
+
     if (html.includes('</head>')) {
       html = html.replace('</head>', templateCSS + '\n</head>');
     } else {
       html = html.replace('</body>', templateCSS + '\n</body>');
     }
 
+    // Compact back button for 500x500 widget
     const backButton = `
       <button id="backBtn" style="
         position: fixed;
-        top: 24px;
-        left: 24px;
-        padding: 0.5rem 1rem;
-        background: #4f46e5;
-        color: #fff;
+        top: 8px;
+        left: 8px;
+        padding: 6px 12px;
+        background: rgba(79, 70, 229, 0.9);
+        color: white;
         border: none;
-        border-radius: 4px;
+        border-radius: 6px;
         font-family: inherit;
+        font-size: 11px;
         cursor: pointer;
         z-index: 999;
-      ">
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.2s ease;
+      " onmouseover="this.style.background='rgba(79, 70, 229, 1)'" 
+         onmouseout="this.style.background='rgba(79, 70, 229, 0.9)'">
         ← Back
       </button>
       <script>
         document.getElementById('backBtn')
-                .addEventListener('click', () => history.back());
+          .addEventListener('click', () => history.back());
       </script>
     `;
-  
+
     html = html.replace(
       /<body([^>]*)>/,
       `<body$1>\n${backButton}`
     );
-    
+
     fs.writeFileSync(htmlPath, html, 'utf8');
     console.log(`✅ ${template.name} template CSS added!`);
   } catch (err) {
     console.error("❌ Failed to add template CSS:", err);
   }
 }
+
+// Modern template optimized for 500x500
 function generateModernCSS() {
   return `
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
       
       * {
         margin: 0;
@@ -125,23 +124,26 @@ function generateModernCSS() {
       }
       
       html, body {
-        height: 100vh !important;
-        width: 100vw !important;
+        height: 500px !important;
+        width: 500px !important;
         overflow: hidden !important;
-        background: linear-gradient(145deg, #e5e7eb, #f3f4f6) !important;
-        font-family: 'Manrope', sans-serif !important;
-        padding: 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        font-family: 'Inter', sans-serif !important;
+        padding: 12px;
+        font-size: 11px !important;
       }
       
       #section {
-        height: calc(100vh - 48px) !important;
-        width: calc(100vw - 48px) !important;
+        height: 476px !important;
+        width: 476px !important;
         overflow: auto !important;
-        background: rgba(255, 255, 255, 0.98) !important;
-        backdrop-filter: blur(12px) !important;
-        border-radius: 24px !important;
-        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.08) !important;
-        padding: 32px !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(20px) !important;
+        border-radius: 16px !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37) !important;
+        padding: 16px !important;
+        margin-top: 8px;
       }
       
       table {
@@ -149,47 +151,42 @@ function generateModernCSS() {
         border-collapse: separate !important;
         border-spacing: 0 !important;
         background: white !important;
-        border-radius: 16px !important;
+        border-radius: 12px !important;
         overflow: hidden !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+        font-size: 10px !important;
       }
       
       td, th {
-        padding: 16px 24px !important;
+        padding: 8px 10px !important;
         text-align: left !important;
         vertical-align: middle !important;
-        font-size: 15px !important;
+        font-size: 10px !important;
         border: none !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        line-height: 1.3 !important;
       }
       
-      tr:first-child td {
-        background: linear-gradient(90deg, #3b82f6, #60a5fa) !important;
-        color: black !important;
-        font-weight: bold !important;
-        font-size: 16px !important;
-        letter-spacing: 0.5px !important;
-        
-      }
-      
-      td:first-child {
-        background: #f1f5f9 !important;
-        color: #1e293b !important;
-        font-weight: bold !important;
-        font-size: 14px !important;
-        min-width: 140px !important;
-      }
-
-      /* cover both td- and th-based headers */
       tr:first-child td,
-      tr:first-child th,
+      tr:first-child th {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+        color: white !important;
+        font-weight: 600 !important;
+        font-size: 11px !important;
+        padding: 10px !important;
+      }
+      
       td:first-child,
       th:first-child {
-        font-weight: bold !important;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+        color: #334155 !important;
+        font-weight: 600 !important;
+        font-size: 10px !important;
+        border-right: 1px solid rgba(148, 163, 184, 0.2) !important;
+        min-width: 60px;
       }
       
       tr:nth-child(even) td:not(:first-child) {
-        background: #f9fafb !important;
+        background: #fafbff !important;
       }
       
       tr:nth-child(odd) td:not(:first-child) {
@@ -197,9 +194,7 @@ function generateModernCSS() {
       }
       
       tr:hover td:not(:first-child) {
-        background: #eff6ff !important;
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15) !important;
+        background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%) !important;
       }
       
       .x22, div[style*="color:red"] {
@@ -207,22 +202,23 @@ function generateModernCSS() {
       }
       
       ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+        width: 6px;
+        height: 6px;
       }
       
       ::-webkit-scrollbar-track {
-        background: rgba(241, 245, 249, 0.5);
-        border-radius: 4px;
+        background: rgba(248, 250, 252, 0.5);
+        border-radius: 3px;
       }
       
       ::-webkit-scrollbar-thumb {
-        background: linear-gradient(90deg, #60a5fa, #3b82f6);
-        border-radius: 4px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border-radius: 3px;
       }
     </style>`;
 }
 
+// Minimal template optimized for 500x500
 function generateMinimalCSS() {
   return `
     <style>
@@ -235,244 +231,68 @@ function generateMinimalCSS() {
       }
       
       html, body {
-        height: 100vh !important;
-        width: 100vw !important;
+        height: 500px !important;
+        width: 500px !important;
         overflow: hidden !important;
-        background: #fafafa !important;
-        font-family: 'Inter', sans-serif !important;
-        padding: 20px;
+        background: #fcfcfc !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        padding: 12px;
       }
       
       #section {
-        height: calc(100vh - 40px) !important;
-        width: calc(100vw - 40px) !important;
+        height: 476px !important;
+        width: 476px !important;
         overflow: auto !important;
         background: white !important;
-        border-radius: 16px !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
-        padding: 24px !important;
+        border-radius: 12px !important;
+        border: 1px solid #e5e7eb !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+        padding: 16px !important;
+        margin-top: 8px;
       }
       
       table {
         width: 100% !important;
         border-collapse: collapse !important;
         background: white !important;
+        font-size: 10px !important;
       }
       
       td, th {
-        padding: 14px 20px !important;
+        padding: 8px 10px !important;
         text-align: left !important;
         vertical-align: middle !important;
-        font-size: 14px !important;
+        font-size: 10px !important;
         border-bottom: 1px solid #f1f5f9 !important;
-        color: #1e293b !important;
-      }
-      
-      tr:first-child td {
-        background: #f8fafc !important;
-        color: #1e293b !important;
-        font-weight: bold !important;
-        font-size: 15px !important;
-        border-bottom: 2px solid #e5e7eb !important;
-      }
-      
-      td:first-child {
         color: #374151 !important;
-        font-weight: bold !important;
-        font-size: 14px !important;
+        line-height: 1.3 !important;
+      }
+      
+      tr:first-child td,
+      tr:first-child th {
         background: #f9fafb !important;
+        color: #111827 !important;
+        font-weight: 600 !important;
+        font-size: 11px !important;
+        border-bottom: 2px solid #e5e7eb !important;
+        padding: 10px !important;
       }
-        /* cover both td- and th-based headers */
-      tr:first-child td,
-      tr:first-child th,
+      
       td:first-child,
       th:first-child {
-        font-weight: bold !important;
+        color: #111827 !important;
+        font-weight: 500 !important;
+        background: #fafbfc !important;
+        border-right: 1px solid #f1f5f9 !important;
+        min-width: 60px;
       }
       
       tr:hover td:not(:first-child) {
-        background: #f1f5f9 !important;
+        background: #f8fafc !important;
       }
       
-      .x22, div[style*="color:red"] {
-        display: none !important;
-      }
-    </style>`;
-}
-
-function generateColorfulCSS() {
-  return `
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap');
-      
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      
-      html, body {
-        height: 100vh !important;
-        width: 100vw !important;
-        overflow: hidden !important;
-        background: linear-gradient(135deg, #f9a8d4, #a5b4fc, #6ee7b7) !important;
-        font-family: 'Outfit', sans-serif !important;
-        padding: 24px;
-      }
-      
-      #section {
-        height: calc(100vh - 48px) !important;
-        width: calc(100vw - 48px) !important;
-        overflow: auto !important;
-        background: rgba(255, 255, 255, 0.95) !important;
-        backdrop-filter: blur(10px) !important;
-        border-radius: 20px !important;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1) !important;
-        padding: 32px !important;
-      }
-      
-      table {
-        width: 100% !important;
-        border-collapse: separate !important;
-        border-spacing: 3px !important;
-        background: transparent !important;
-      }
-      
-      td, th {
-        padding: 16px 20px !important;
-        text-align: left !important;
-        vertical-align: middle !important;
-        font-size: 14px !important;
-        border: none !important;
-        border-radius: 8px !important;
-        transition: all 0.3s ease !important;
-      }
-      
-      tr:first-child td {
-        background: linear-gradient(90deg, #ec4899, #f472b6) !important;
-        color: black !important;
-        font-weight: bold !important;
-        font-size: 15px !important;
-      }
-      
-      td:first-child {
-        background: linear-gradient(90deg, #f43f5e, #fb7185) !important;
-        color: black !important;
-        font-weight: bold !important;
-        font-size: 14px !important;
-      }
-        /* cover both td- and th-based headers */
-      tr:first-child td,
-      tr:first-child th,
-      td:first-child,
-      th:first-child {
-        font-weight: bold !important;
-      }
-      
-      
-      tr:nth-child(even) td:not(:first-child):not([title]) {
-        background: linear-gradient(90deg, #fff1f2, #ffe4e6) !important;
-      }
-      
-      tr:nth-child(odd) td:not(:first-child):not([title]) {
-        background: linear-gradient(90deg, #ecfdf5, #d1fae5) !important;
-      }
-      
-      tr:hover td:not(:first-child) {
-        transform: scale(1.02) !important;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08) !important;
-      }
-      
-      .x22, div[style*="color:red"] {
-        display: none !important;
-      }
-    </style>`;
-}
-
-function generateDarkCSS() {
-  return `
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
-      
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      
-      html, body {
-        height: 100vh !important;
-        width: 100vw !important;
-        overflow: hidden !important;
-        background: linear-gradient(135deg, #1f2937, #374151) !important;
-        font-family: 'Space Mono', monospace !important;
-        padding: 24px;
-      }
-      
-      #section {
-        height: calc(100vh - 48px) !important;
-        width: calc(100vw - 48px) !important;
-        overflow: auto !important;
-        background: rgba(17, 24, 39, 0.95) !important;
-        backdrop-filter: blur(12px) !important;
-        border: 1px solid rgba(59, 130, 246, 0.15) !important;
-        border-radius: 20px !important;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2) !important;
-        padding: 32px !important;
-      }
-      
-      table {
-        width: 100% !important;
-        border-collapse: separate !important;
-        border-spacing: 2px !important;
-        background: #111827 !important;
-        border-radius: 12px !important;
-        overflow: hidden !important;
-      }
-      
-      td, th {
-        padding: 16px 20px !important;
-        text-align: left !important;
-        vertical-align: middle !important;
-        font-size: 14px !important;
-        border: none !important;
-        color: #d1d5db !important;
-        transition: all 0.3s ease !important;
-      }
-      
-      tr:first-child td {
-        background: linear-gradient(90deg, #2563eb, #3b82f6) !important;
-        color: white !important;
-        font-weight: bold !important;
-        font-size: 15px !important;
-      }
-      
-      td:first-child {
-        background: linear-gradient(90deg, #1e3a8a, #1e40af) !important;
-        color: white !important;
-        font-weight: bold !important;
-        font-size: 14px !important;
-      }
-      /* cover both td- and th-based headers */
-      tr:first-child td,
-      tr:first-child th,
-      td:first-child,
-      th:first-child {
-        font-weight: bold !important;
-      }
-      tr:nth-child(even) td:not(:first-child) {
-        background: #1f2937 !important;
-      }
-      
-      tr:nth-child(odd) td:not(:first-child) {
-        background: #111827 !important;
-      }
-      
-      tr:hover td:not(:first-child) {
-        background: linear-gradient(90deg, #4b5563, #6b7280) !important;
-        color: white !important;
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2) !important;
+      tr:last-child td {
+        border-bottom: none !important;
       }
       
       .x22, div[style*="color:red"] {
@@ -480,26 +300,244 @@ function generateDarkCSS() {
       }
       
       ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+        width: 4px;
+        height: 4px;
       }
       
       ::-webkit-scrollbar-track {
-        background: rgba(31, 41, 55, 0.4);
-        border-radius: 4px;
+        background: transparent;
       }
       
       ::-webkit-scrollbar-thumb {
-        background: linear-gradient(90deg, #2563eb, #3b82f6);
-        border-radius: 4px;
+        background: #d1d5db;
+        border-radius: 2px;
+      }
+    </style>`;
+}
+
+// Colorful template optimized for 500x500
+function generateColorfulCSS() {
+  return `
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+      
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      html, body {
+        height: 500px !important;
+        width: 500px !important;
+        overflow: hidden !important;
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 25%, #a8edea 75%, #fed6e3 100%) !important;
+        font-family: 'Poppins', sans-serif !important;
+        padding: 12px;
+      }
+      
+      #section {
+        height: 476px !important;
+        width: 476px !important;
+        overflow: auto !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(25px) !important;
+        border-radius: 16px !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+        padding: 16px !important;
+        margin-top: 8px;
+      }
+      
+      table {
+        width: 100% !important;
+        border-collapse: separate !important;
+        border-spacing: 2px !important;
+        background: transparent !important;
+        border-radius: 12px !important;
+        font-size: 10px !important;
+      }
+      
+      td, th {
+        padding: 8px 10px !important;
+        text-align: left !important;
+        vertical-align: middle !important;
+        font-size: 10px !important;
+        border: none !important;
+        border-radius: 8px !important;
+        line-height: 1.3 !important;
+      }
+      
+      tr:first-child td,
+      tr:first-child th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        font-weight: 600 !important;
+        font-size: 11px !important;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+        padding: 10px !important;
+      }
+      
+      td:first-child,
+      th:first-child {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important;
+        color: #2d3748 !important;
+        font-weight: 600 !important;
+        min-width: 60px;
+      }
+      
+      tr:nth-child(even) td:not(:first-child) {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%) !important;
+        color: #2d3748 !important;
+      }
+      
+      tr:nth-child(odd) td:not(:first-child) {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important;
+        color: #2d3748 !important;
+      }
+      
+      tr:hover td:not(:first-child) {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%) !important;
+        color: white !important;
+        transform: scale(1.01) !important;
+      }
+      
+      .x22, div[style*="color:red"] {
+        display: none !important;
+      }
+      
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 3px;
+      }
+    </style>`;
+}
+
+// Dark template optimized for 500x500
+function generateDarkCSS() {
+  return `
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+      
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      html, body {
+        height: 500px !important;
+        width: 500px !important;
+        overflow: hidden !important;
+        background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 100%) !important;
+        font-family: 'JetBrains Mono', monospace !important;
+        padding: 12px;
+      }
+      
+      #section {
+        height: 476px !important;
+        width: 476px !important;
+        overflow: auto !important;
+        background: rgba(15, 15, 15, 0.95) !important;
+        backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5) !important;
+        padding: 16px !important;
+        margin-top: 8px;
+      }
+      
+      table {
+        width: 100% !important;
+        border-collapse: separate !important;
+        border-spacing: 1px !important;
+        background: #111111 !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+        font-size: 10px !important;
+      }
+      
+      td, th {
+        padding: 8px 10px !important;
+        text-align: left !important;
+        vertical-align: middle !important;
+        font-size: 10px !important;
+        border: none !important;
+        color: #e2e8f0 !important;
+        line-height: 1.3 !important;
+      }
+      
+      tr:first-child td,
+      tr:first-child th {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%) !important;
+        color: #e0e7ff !important;
+        font-weight: 600 !important;
+        font-size: 11px !important;
+        padding: 10px !important;
+      }
+      
+      td:first-child,
+      th:first-child {
+        background: linear-gradient(135deg, #374151 0%, #4b5563 100%) !important;
+        color: #f1f5f9 !important;
+        font-weight: 500 !important;
+        border-right: 1px solid rgba(75, 85, 99, 0.3) !important;
+        min-width: 60px;
+      }
+      
+      tr:nth-child(even) td:not(:first-child) {
+        background: #1a1a1a !important;
+      }
+      
+      tr:nth-child(odd) td:not(:first-child) {
+        background: #111111 !important;
+      }
+      
+      tr:hover td:not(:first-child) {
+        background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%) !important;
+        color: #e0e7ff !important;
+      }
+      
+      .x22, div[style*="color:red"] {
+        display: none !important;
+      }
+      
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: rgba(55, 65, 81, 0.3);
+        border-radius: 3px;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #1e40af, #3730a3);
+        border-radius: 3px;
       }
     </style>`;
 }
 
 const createWindow = async () => {
   const win = new BrowserWindow({
-    width: 2000,
-    height: 2000,
+    width: 500,
+    height: 500,
+    frame: false,
+    resizable: false,
+    x: 1000,
+    y: 0,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       icon: path.join(__dirname, 'resources', 'myIcon.icns'),
@@ -507,14 +545,12 @@ const createWindow = async () => {
     }
   });
 
-  // Load the initial interface
   const indexPath = path.join(__dirname, "index.html");
   win.loadFile(indexPath);
 }
 
 app.whenReady().then(() => {
   createWindow()
-
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow()
@@ -537,35 +573,32 @@ ipcMain.handle('open-file', async () => {
   }
 
   const filePath = filePaths[0];
-  
   try {
-    return { 
-      canceled: false, 
+    return {
+      canceled: false,
       filePath: filePath,
-      success: true 
+      success: true
     };
   } catch (error) {
     console.error("Error processing file:", error);
-    return { 
-      canceled: false, 
+    return {
+      canceled: false,
       error: error.message,
-      success: false 
+      success: false
     };
   }
 });
 
 ipcMain.handle('process-with-template', async (event, { filePath, template }) => {
   try {
-    // Generate HTML from the selected file with the chosen template
     const outputPath = await generateHtml(filePath, template);
-    
-    return { 
+    return {
       success: true,
       outputPath: outputPath
     };
   } catch (error) {
     console.error("Error processing file with template:", error);
-    return { 
+    return {
       success: false,
       error: error.message
     };
@@ -573,8 +606,8 @@ ipcMain.handle('process-with-template', async (event, { filePath, template }) =>
 });
 
 app.setLoginItemSettings({
-    openAtLogin: true,
-    path: app.getPath('exe')
+  openAtLogin: true,
+  path: app.getPath('exe')
 })
 
 app.on('window-all-closed', () => {
